@@ -33,7 +33,7 @@ Sistema completo para la gestión de turnos con autenticación de usuarios, conf
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/sistema-turnos.git
+git clone https://github.com/alvaroschneider/sistema-turnos.git
 cd sistema-turnos
 ```
 
