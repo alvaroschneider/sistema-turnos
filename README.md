@@ -37,34 +37,40 @@ git clone https://github.com/tu-usuario/sistema-turnos.git
 cd sistema-turnos
 
 ### 2. Crear entorno virtual
-bash
+
+```bash
 python3 -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 
 ### 3. Instalar dependencias
-bash
+
+```bash
 pip install -r requirements.txt
 
 ### 4. Configurar variables de entorno
-bash
+
+```bash
 cp .env.example .env
 # Editar .env con tus credenciales de MySQL
 nano .env
 
 ### 5. Crear base de datos
-bash
+
+```bash
 mysql -u root -p
 CREATE DATABASE sistema_turnos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 EXIT;
 
 ### 6. Ejecutar la aplicación
-bash
+
+```bash
 python app.py
 # o usar el script de inicio
 chmod +x run.sh
 ./run.sh
 
 ### 7. Acceder a la aplicación
+
 Local: http://localhost:5001
 
 Red: http://tu-ip:5001
