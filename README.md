@@ -85,7 +85,7 @@ Red: http://tu-ip:5001
 Admin: admin / admin123
 
 ## Estructura del Proyecto
-text
+```bash
 sistema-turnos/
 ├── app.py                 # Aplicación principal
 ├── models.py              # Modelos de datos
@@ -104,6 +104,7 @@ sistema-turnos/
 │   └── perfil.html
 └── static/              # Archivos estáticos
     └── style.css
+```
 
 ### Uso
 ## Para Usuarios
