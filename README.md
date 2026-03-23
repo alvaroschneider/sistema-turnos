@@ -35,17 +35,20 @@ Sistema completo para la gestión de turnos con autenticación de usuarios, conf
 ```bash
 git clone https://github.com/tu-usuario/sistema-turnos.git
 cd sistema-turnos
+```
 
 ### 2. Crear entorno virtual
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
+```
 
 ### 3. Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
+```
 
 ### 4. Configurar variables de entorno
 
@@ -53,6 +56,7 @@ pip install -r requirements.txt
 cp .env.example .env
 # Editar .env con tus credenciales de MySQL
 nano .env
+```
 
 ### 5. Crear base de datos
 
@@ -60,14 +64,16 @@ nano .env
 mysql -u root -p
 CREATE DATABASE sistema_turnos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 EXIT;
+```
 
 ### 6. Ejecutar la aplicación
 
 ```bash
-python app.py
+python3 app.py
 # o usar el script de inicio
 chmod +x run.sh
 ./run.sh
+```
 
 ### 7. Acceder a la aplicación
 
@@ -75,10 +81,10 @@ Local: http://localhost:5001
 
 Red: http://tu-ip:5001
 
-Credenciales por defecto
+## Credenciales por defecto
 Admin: admin / admin123
 
-Estructura del Proyecto
+## Estructura del Proyecto
 text
 sistema-turnos/
 ├── app.py                 # Aplicación principal
@@ -98,39 +104,29 @@ sistema-turnos/
 │   └── perfil.html
 └── static/              # Archivos estáticos
     └── style.css
-Uso
-Para Usuarios
-Registrarse o iniciar sesión
 
-Solicitar turno seleccionando fecha y hora disponible
+### Uso
+## Para Usuarios
+1. Registrarse o iniciar sesión
+2. Solicitar turno seleccionando fecha y hora disponible
+3. Ver sus turnos en "Mis Turnos"
+4. Cancelar turnos pendientes
 
-Ver sus turnos en "Mis Turnos"
+## Para Operadores
+1. Atender turnos desde la lista
+2. Ver estadísticas básicas
 
-Cancelar turnos pendientes
+## Para Administradores
+1. Gestionar usuarios (crear, editar, eliminar)
+2. Configurar horarios laborales
+3. Ver estadísticas completas
+4. Establecer turnos prioritarios
 
-Para Operadores
-Atender turnos desde la lista
-
-Ver estadísticas básicas
-
-Para Administradores
-Gestionar usuarios (crear, editar, eliminar)
-
-Configurar horarios laborales
-
-Ver estadísticas completas
-
-Establecer turnos prioritarios
-
-Configuración de Horarios
+## Configuración de Horarios
 Los administradores pueden configurar:
 
-Días laborables
-
-Horarios de mañana y tarde
-
-Horario de almuerzo
-
-Días no laborables (feriados)
-
-Duración de los turnos
+* Días laborables
+* Horarios de mañana y tarde
+* Horario de almuerzo
+* Días no laborables (feriados)
+* Duración de los turnos
