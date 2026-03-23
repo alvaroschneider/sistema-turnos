@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomar Turno - Sistema de Turnos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .horarios-disponibles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .hora-btn {
+            padding: 10px 15px;
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .hora-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .hora-btn.selected {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .fecha-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tomar Turno</h1>
+            <div class="user-info">
+                <span>Bienvenido, {{ current_user.nombre_completo }}</span>
+                <span class="rol-badge">{{ current_user.rol.value }}</span>
+                <a href="{{ url_for('logout') }}" class="btn-small">Cerrar Sesión</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% if turno %}
+            <div class="turno-info">
+                <h2>¡Turno Asignado!</h2>
+                <div class="numero-turno">{{ turno.numero }}</div>
+                <p><strong>Cliente:</strong> {{ turno.nombre_cliente }}</p>
+                <p><strong>Servicio:</strong> {{ turno.tipo_servicio }}</p>
+                <p><strong>Fecha y Hora:</strong> {{ turno.fecha_turno.strftime('%d/%m/%Y %H:%M') }}</p>
+                {% if turno.prioridad == 1 %}
+                    <p><strong>Prioridad:</strong> ⭐ Prioritario</p>
+                {% endif %}
+                <div class="actions">
+                    <a href="{{ url_for('dashboard') }}" class="btn">Volver al Inicio</a>
+                    <a href="{{ url_for('tomar_turno') }}" class="btn btn-primary">Nuevo Turno</a>
+                </div>
+            </div>
+        {% else %}
+            <form method="POST" class="turno-form" id="turnoForm">
+                <div class="form-group">
+                    <label for="nombre">Nombre del Cliente:</label>
+                    <input type="text" id="nombre" name="nombre" required 
+                           placeholder="Ingrese el nombre completo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="servicio">Tipo de Servicio:</label>
+                    <select id="servicio" name="servicio" required>
+                        <option value="">Seleccionar servicio...</option>
+                        <option value="consultas">Consultas Generales</option>
+                        <option value="tramites">Trámites Documentales</option>
+                        <option value="atencion_al_cliente">Atención al Cliente</option>
+                        <option value="soporte_tecnico">Soporte Técnico</option>
+                        <option value="ventas">Ventas y Cotizaciones</option>
+                        <option value="otros">Otros Servicios</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fecha_turno">Fecha del Turno:</label>
+                    <input type="date" id="fecha_turno" name="fecha_turno" 
+                           min="{{ now.utcnow().strftime('%Y-%m-%d') }}" 
+                           class="fecha-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Horarios Disponibles:</label>
+                    <div id="horarios-container" class="horarios-disponibles">
+                        <div class="loading">Seleccione una fecha para ver horarios disponibles</div>
+                    </div>
+                    <input type="hidden" id="hora_turno" name="hora_turno" required>
+                </div>
+                
+                {% if current_user.rol.value in ['admin', 'operador'] %}
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="prioridad" name="prioridad" value="1">
+                        Marcar como turno prioritario
+                    </label>
+                </div>
+                {% endif %}
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>Generar Turno</button>
+                    <a href="{{ url_for('dashboard') }}" class="btn">Cancelar</a>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+    
+    <script>
+        const fechaInput = document.getElementById('fecha_turno');
+        const horariosContainer = document.getElementById('horarios-container');
+        const horaTurnoInput = document.getElementById('hora_turno');
+        const submitBtn = document.getElementById('submitBtn');
+        let horaSeleccionada = null;
+        
+        fechaInput.addEventListener('change', function() {
+            const fecha = this.value;
+            if (!fecha) return;
+            
+            // Mostrar loading
+            horariosContainer.innerHTML = '<div class="loading">Cargando horarios disponibles...</div>';
+            horaSeleccionada = null;
+            horaTurnoInput.value = '';
+            submitBtn.disabled = true;
+            
+            // Llamar API para obtener horarios
+            fetch(`/obtener_horarios_disponibles?fecha=${fecha}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.horarios.length === 0) {
+                        horariosContainer.innerHTML = '<div class="alert alert-warning">No hay horarios disponibles para esta fecha</div>';
+                        return;
+                    }
+                    
+                    // Mostrar horarios
+                    horariosContainer.innerHTML = '';
+                    data.horarios.forEach(hora => {
+                        const btn = document.createElement('div');
+                        btn.className = 'hora-btn';
+                        btn.textContent = hora;
+                        btn.onclick = () => seleccionarHora(btn, hora);
+                        horariosContainer.appendChild(btn);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    horariosContainer.innerHTML = '<div class="alert alert-error">Error al cargar horarios</div>';
+                });
+        });
+        
+        function seleccionarHora(btn, hora) {
+            // Remover selección anterior
+            document.querySelectorAll('.hora-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            
+            // Seleccionar nueva hora
+            btn.classList.add('selected');
+            horaSeleccionada = hora;
+            horaTurnoInput.value = hora;
+            submitBtn.disabled = false;
+        }
+        
+        // Validar antes de enviar
+        document.getElementById('turnoForm').addEventListener('submit', function(e) {
+            if (!horaSeleccionada) {
+                e.preventDefault();
+                alert('Por favor seleccione un horario');
+                return false;
+            }
+        });
+        
+        // Establecer fecha mínima como hoy
+        const hoy = new Date();
+        const yyyy = hoy.getFullYear();
+        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoy.getDate()).padStart(2, '0');
+        fechaInput.min = `${yyyy}-${mm}-${dd}`;
+    </script>
+</body>
+</html>

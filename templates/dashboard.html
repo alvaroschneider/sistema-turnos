@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Turnos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema de Gestión de Turnos</h1>
+            <div class="user-info">
+                <span>Bienvenido, {{ current_user.nombre_completo }}</span>
+                <span class="rol-badge">{{ current_user.rol.value }}</span>
+                <a href="{{ url_for('perfil') }}" class="btn-small">Mi Perfil</a>
+                <a href="{{ url_for('logout') }}" class="btn-small">Cerrar Sesión</a>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Turnos Hoy</h3>
+                <div class="stat-number">{{ turnos_hoy }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Pendientes</h3>
+                <div class="stat-number">{{ turnos_pendientes }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Atendidos Hoy</h3>
+                <div class="stat-number">{{ turnos_atendidos_hoy }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Tiempo Promedio</h3>
+                <div class="stat-number">{{ tiempo_promedio }} min</div>
+            </div>
+        </div>
+        
+        <div class="menu">
+            <a href="{{ url_for('tomar_turno') }}" class="btn">Tomar Turno</a>
+            <a href="{{ url_for('mis_turnos') }}" class="btn">Mis Turnos</a>
+            <a href="{{ url_for('listar_turnos') }}" class="btn">Listar Turnos</a>
+            {% if current_user.rol.value == 'admin' %}
+                <a href="{{ url_for('estadisticas') }}" class="btn">Estadísticas</a>
+                <a href="{{ url_for('admin_usuarios') }}" class="btn">Gestionar Usuarios</a>
+                <a href="{{ url_for('admin_horarios') }}" class="btn">Configurar Horarios</a>
+            {% endif %}
+        </div>
+        
+        <div class="recent-turns">
+            <h2>Últimos Turnos</h2>
+            {% if ultimos_turnos %}
+                 <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Turno</th>
+                            <th>Cliente</th>
+                            <th>Servicio</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                         </tr>
+                    </thead>
+                    <tbody>
+                        {% for turno in ultimos_turnos %}
+                         <tr>
+                            <td>{{ turno.numero }}</td>
+                            <td>{{ turno.nombre_cliente }}</td>
+                            <td>{{ turno.tipo_servicio }}</td>
+                            <td>
+                                <span class="estado-{{ turno.estado }}">{{ turno.estado }}</span>
+                            </td>
+                            <td>{{ turno.fecha_turno.strftime('%d/%m/%Y %H:%M') }}</td>
+                         </tr>
+                        {% endfor %}
+                    </tbody>
+                 </table>
+            {% else %}
+                <p>No hay turnos registrados</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

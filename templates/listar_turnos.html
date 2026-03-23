@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listar Turnos - Sistema de Turnos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gestión de Turnos</h1>
+            <div class="user-info">
+                <span>Bienvenido, {{ current_user.nombre_completo }}</span>
+                <span class="rol-badge">{{ current_user.rol.value }}</span>
+                <a href="{{ url_for('logout') }}" class="btn-small">Cerrar Sesión</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="seccion">
+            <h2>Turnos Pendientes 
+                {% if pendientes|length > 0 %}
+                    <span class="badge">{{ pendientes|length }}</span>
+                {% endif %}
+            </h2>
+            
+            {% if pendientes %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Turno</th>
+                                <th>Cliente</th>
+                                <th>Servicio</th>
+                                <th>Prioridad</th>
+                                <th>Fecha</th>
+                                <th>Espera (min)</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for turno in pendientes %}
+                            <tr class="{% if turno.prioridad == 1 %}prioritario{% endif %}">
+                                <td class="turno-numero">{{ turno.numero }}</td>
+                                <td>{{ turno.nombre_cliente }}</td>
+                                <td>{{ turno.tipo_servicio }}</td>
+                                <td>
+                                    {% if turno.prioridad == 1 %}
+                                        <span class="badge-prioridad">⭐ Prioritario</span>
+                                    {% else %}
+                                        <span class="badge-normal">Normal</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ turno.fecha_turno.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    {% set tiempo_espera = ((now.utcnow() - turno.fecha_creacion).total_seconds() / 60)|int %}
+                                    {{ tiempo_espera }} min
+                                </td>
+                                <td class="acciones">
+                                    {% if current_user.rol.value in ['admin', 'operador'] %}
+                                        <a href="{{ url_for('atender_turno', id=turno.id) }}" class="btn-small btn-success">Atender</a>
+                                    {% endif %}
+                                    <a href="{{ url_for('cancelar_turno', id=turno.id) }}" class="btn-small btn-danger">Cancelar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>✨ No hay turnos pendientes</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="seccion">
+            <h2>Últimos Turnos Atendidos</h2>
+            {% if atendidos %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Turno</th>
+                                <th>Cliente</th>
+                                <th>Servicio</th>
+                                <th>Atendido por</th>
+                                <th>Atendido</th>
+                                <th>Tiempo Espera</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for turno in atendidos %}
+                            <tr>
+                                <td>{{ turno.numero }}</td>
+                                <td>{{ turno.nombre_cliente }}</td>
+                                <td>{{ turno.tipo_servicio }}</td>
+                                <td>{{ turno.atendedor.nombre_completo if turno.atendedor else '-' }}</td>
+                                <td>{{ turno.fecha_atencion.strftime('%d/%m/%Y %H:%M') if turno.fecha_atencion else '-' }}</td>
+                                <td>{{ turno.tiempo_espera if turno.tiempo_espera else '-' }} min</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>📋 No hay turnos atendidos aún</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="menu-actions">
+            <a href="{{ url_for('dashboard') }}" class="btn">Volver al Dashboard</a>
+            <a href="{{ url_for('tomar_turno') }}" class="btn btn-primary">Nuevo Turno</a>
+        </div>
+    </div>
+</body>
+</html>

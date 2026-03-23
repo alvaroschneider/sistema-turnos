@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Sistema de Turnos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gestión de Usuarios</h1>
+            <div class="user-info">
+                <span>Bienvenido, {{ current_user.nombre_completo }}</span>
+                <span class="rol-badge">{{ current_user.rol.value }}</span>
+                <a href="{{ url_for('logout') }}" class="btn-small">Cerrar Sesión</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="menu">
+            <a href="{{ url_for('admin_usuario_nuevo') }}" class="btn">+ Nuevo Usuario</a>
+            <a href="{{ url_for('dashboard') }}" class="btn">Volver al Dashboard</a>
+        </div>
+        
+        <div class="users-table">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Turnos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td>{{ usuario.id }}</td>
+                        <td>{{ usuario.username }}</td>
+                        <td>{{ usuario.nombre_completo }}</td>
+                        <td>{{ usuario.email }}</td>
+                        <td>{{ usuario.telefono or '-' }}</td>
+                        <td>
+                            <span class="rol-badge" style="background: {% if usuario.rol.value == 'admin' %}#dc3545{% elif usuario.rol.value == 'operador' %}#28a745{% else %}#17a2b8{% endif %}">
+                                {{ usuario.rol.value }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if usuario.activo %}
+                                <span class="estado-activo">✓ Activo</span>
+                            {% else %}
+                                <span class="estado-inactivo">✗ Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ usuario.turnos.count() }}</td>
+                        <td class="acciones">
+                            <a href="{{ url_for('admin_usuario_editar', id=usuario.id) }}" class="btn-small">Editar</a>
+                            {% if usuario.id != current_user.id %}
+                                <a href="{{ url_for('admin_usuario_eliminar', id=usuario.id) }}" 
+                                   class="btn-small btn-danger"
+                                   onclick="return confirm('¿Eliminar usuario {{ usuario.username }}?')">
+                                    Eliminar
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

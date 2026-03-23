@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas - Sistema de Turnos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Estadísticas del Sistema</h1>
+            <div class="user-info">
+                <span>Bienvenido, {{ current_user.nombre_completo }}</span>
+                <span class="rol-badge">{{ current_user.rol.value }}</span>
+                <a href="{{ url_for('logout') }}" class="btn-small">Cerrar Sesión</a>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-card-large">
+                <h2>Total General</h2>
+                <div class="stat-number-large">{{ total_turnos }}</div>
+                <p>turnos registrados</p>
+            </div>
+            
+            <div class="stat-card-large">
+                <h2>Turnos por Servicio</h2>
+                <div class="chart-container">
+                    {% for servicio, count in turnos_por_servicio %}
+                    <div class="chart-bar">
+                        <span class="chart-label">{{ servicio }}:</span>
+                        <div class="bar">
+                            <div class="bar-fill" style="width: {{ (count / total_turnos * 100) if total_turnos > 0 else 0 }}%"></div>
+                        </div>
+                        <span class="chart-value">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="stat-card-large">
+                <h2>Turnos por Estado</h2>
+                <div class="status-grid">
+                    {% for estado, count in turnos_por_estado %}
+                    <div class="status-item">
+                        <span class="status-name estado-{{ estado }}">{{ estado }}</span>
+                        <span class="status-count">{{ count }}</span>
+                        <span class="status-percentage">
+                            ({{ (count / total_turnos * 100) if total_turnos > 0 else 0 }}%)
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="stat-card-large">
+                <h2>Top Usuarios por Turnos Creados</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Turnos Creados</th>
+                            <th>% del Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for username, count in turnos_por_usuario %}
+                        <tr>
+                            <td>{{ username }}</td>
+                            <td>{{ count }}</td>
+                            <td>{{ (count / total_turnos * 100) if total_turnos > 0 else 0 }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="menu-actions">
+            <a href="{{ url_for('dashboard') }}" class="btn">Volver al Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

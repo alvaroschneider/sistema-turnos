@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Sistema de Turnos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mi Perfil</h1>
+            <div class="user-info">
+                <span>Bienvenido, {{ current_user.nombre_completo }}</span>
+                <span class="rol-badge">{{ current_user.rol.value }}</span>
+                <a href="{{ url_for('logout') }}" class="btn-small">Cerrar Sesión</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2>{{ usuario.nombre_completo }}</h2>
+                <p>@{{ usuario.username }}</p>
+            </div>
+            
+            <div class="profile-info">
+                <div class="info-group">
+                    <h3>Información de Contacto</h3>
+                    <p><strong>Email:</strong> {{ usuario.email }}</p>
+                    <p><strong>Teléfono:</strong> {{ usuario.telefono or 'No especificado' }}</p>
+                    <p><strong>Dirección:</strong> {{ usuario.direccion or 'No especificada' }}</p>
+                </div>
+                
+                <div class="info-group">
+                    <h3>Información de Cuenta</h3>
+                    <p><strong>Rol:</strong> {{ usuario.rol.value }}</p>
+                    <p><strong>Fecha de registro:</strong> {{ usuario.fecha_registro.strftime('%d/%m/%Y') }}</p>
+                    <p><strong>Último acceso:</strong> {{ usuario.ultimo_acceso.strftime('%d/%m/%Y %H:%M') if usuario.ultimo_acceso else 'Nunca' }}</p>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <a href="{{ url_for('perfil_editar') }}" class="btn">Editar Perfil</a>
+                <a href="{{ url_for('dashboard') }}" class="btn">Volver al Dashboard</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

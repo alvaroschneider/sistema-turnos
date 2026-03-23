@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Turnos - Sistema de Turnos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mis Turnos</h1>
+            <div class="user-info">
+                <span>Bienvenido, {{ current_user.nombre_completo }}</span>
+                <span class="rol-badge">{{ current_user.rol.value }}</span>
+                <a href="{{ url_for('perfil') }}" class="btn-small">Mi Perfil</a>
+                <a href="{{ url_for('logout') }}" class="btn-small">Cerrar Sesión</a>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="seccion">
+            <h2>Mis Turnos</h2>
+
+            {% if turnos %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Turno</th>
+                            <th>Servicio</th>
+                            <th>Fecha y Hora</th>
+                            <th>Estado</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for turno in turnos %}
+                        <tr class="{% if turno.prioridad == 1 %}prioritario{% endif %}">
+                            <td class="turno-numero">{{ turno.numero }}</td>
+                            <td>{{ turno.tipo_servicio }}</td>
+                            <td><strong>{{ turno.fecha_turno.strftime('%d/%m/%Y %H:%M') }}</strong></td>
+                            <td>
+                                <span class="estado-{{ turno.estado }}">
+                                    {% if turno.estado == 'pendiente' %}
+                                    ⏳ Pendiente
+                                    {% elif turno.estado == 'atendido' %}
+                                    ✓ Atendido
+                                    {% elif turno.estado == 'cancelado' %}
+                                    ✗ Cancelado
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>{{ turno.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                {% if turno.estado == 'pendiente' and turno.fecha_turno > now.utcnow() %}
+                                <a href="{{ url_for('cancelar_mi_turno', id=turno.id) }}" class="btn-small btn-danger"
+                                    onclick="return confirm('¿Estás seguro de cancelar este turno?')">
+                                    Cancelar
+                                </a>
+                                {% elif turno.estado == 'pendiente' %}
+                                <span class="text-muted">Turno vencido</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>📋 No tienes turnos registrados</p>
+                <a href="{{ url_for('tomar_turno') }}" class="btn">Tomar un Turno</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="menu-actions">
+            <a href="{{ url_for('tomar_turno') }}" class="btn">Nuevo Turno</a>
+            <a href="{{ url_for('dashboard') }}" class="btn">Volver al Dashboard</a>
+        </div>
+    </div>
+</body>
+
+</html>
