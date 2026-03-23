@@ -81,10 +81,10 @@ Local: http://localhost:5001
 
 Red: http://tu-ip:5001
 
-## Credenciales por defecto
+#### Credenciales por defecto
 Admin: admin / admin123
 
-## Estructura del Proyecto
+#### Estructura del Proyecto
 ```bash
 sistema-turnos/
 ├── app.py                 # Aplicación principal
@@ -107,23 +107,23 @@ sistema-turnos/
 ```
 
 ### Uso
-## Para Usuarios
+#### Para Usuarios
 1. Registrarse o iniciar sesión
 2. Solicitar turno seleccionando fecha y hora disponible
 3. Ver sus turnos en "Mis Turnos"
 4. Cancelar turnos pendientes
 
-## Para Operadores
+#### Para Operadores
 1. Atender turnos desde la lista
 2. Ver estadísticas básicas
 
-## Para Administradores
+#### Para Administradores
 1. Gestionar usuarios (crear, editar, eliminar)
 2. Configurar horarios laborales
 3. Ver estadísticas completas
 4. Establecer turnos prioritarios
 
-## Configuración de Horarios
+#### Configuración de Horarios
 Los administradores pueden configurar:
 
 * Días laborables
